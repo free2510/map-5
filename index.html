@@ -23,23 +23,27 @@
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoiZnJlZWZyZWU2MCIsImEiOiJjbHdyZ2hlamwwMGczMmlzYXJiem9oaHFxIn0.bp_4Do2mZmVjZwkDxlWmfw';
 
-        function initializeMap(locations) {
+        function initializeMap(data) {
             var map = new mapboxgl.Map({
                 container: 'map',
                 style: 'mapbox://styles/mapbox/satellite-v9',
-                center: [locations[0].longitude, locations[0].latitude],
+                center: [data.pharmacy[0].longitude, data.pharmacy[0].latitude],
                 zoom: 10
             });
 
-            locations.forEach(function(location) {
-                var marker = new mapboxgl.Marker()
-                    .setLngLat([location.longitude, location.latitude])
-                    .addTo(map);
+            var locations = Object.values(data);
 
-                var popup = new mapboxgl.Popup({ offset: 25 })
-                    .setHTML('<div class="marker-title">' + location.name + '</div>');
+            locations.forEach(function(locationType) {
+                locationType.forEach(function(location) {
+                    var marker = new mapboxgl.Marker()
+                        .setLngLat([location.longitude, location.latitude])
+                        .addTo(map);
 
-                marker.setPopup(popup);
+                    var popup = new mapboxgl.Popup({ offset: 25 })
+                        .setHTML('<div class="marker-title">' + location.name + '</div>');
+
+                    marker.setPopup(popup);
+                });
             });
         }
 
@@ -52,9 +56,7 @@
             fetch(firebaseUrl)
                 .then(response => response.json())
                 .then(data => {
-                    // Convert Firebase data object to array
-                    const dataArray = Object.keys(data).map(key => data[key]);
-                    initializeMap(dataArray);
+                    initializeMap(data);
                 })
                 .catch(error => console.error('Error fetching data from Firebase:', error));
         } else {
